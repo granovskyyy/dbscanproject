@@ -5,6 +5,10 @@ class DBSCAN:
         self.eps=eps
         self.min_samples=min_samples
         self.labels_=None
+        if eps <= 0:
+            raise ValueError("eps must be positive")
+        if min_samples < 1:
+            raise ValueError("min_samples must be at least 1")
 
     def region_query(self, X, point_idx):
         distances=np.linalg.norm(X-X[point_idx], axis=1)
@@ -27,10 +31,11 @@ class DBSCAN:
                 continue
 
             labels[px]=cluster_id
+            seeds=list(neighbors)
 
             i=0
-            while i<len(neighbors):
-                neighbor_idx=neighbors[i]
+            while i<len(seeds):
+                neighbor_idx=seeds[i]
 
                 if labels[neighbor_idx]==-1:
                     labels[neighbor_idx]=cluster_id
@@ -43,7 +48,7 @@ class DBSCAN:
 
                 new_neighbors=self.region_query(X, neighbor_idx)
                 if len(new_neighbors)>=self.min_samples:
-                    neighbors=np.concatenate((neighbors,new_neighbors))
+                    seeds.extend(new_neighbors)
 
                 i+=1
 
